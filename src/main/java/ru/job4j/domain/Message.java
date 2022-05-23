@@ -16,7 +16,6 @@ public class Message {
     private String message;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime created;
 
     @ManyToOne

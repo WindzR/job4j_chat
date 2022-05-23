@@ -35,6 +35,21 @@ public class Room {
         return room;
     }
 
+    public void addMember(Person person) {
+        if (!members.contains(person)) {
+            members.add(person);
+        }
+    }
+
+    public void addAdmin(Person person) {
+        members.remove(person);
+        admins.add(person);
+    }
+
+    public boolean containsPerson(Person person) {
+        return members.contains(person) || admins.contains(person);
+    }
+
     public int getId() {
         return id;
     }
