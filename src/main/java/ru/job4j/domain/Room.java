@@ -1,11 +1,12 @@
 package ru.job4j.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
+@Table(name = "rooms")
 public class Room {
 
     @Id
@@ -14,17 +15,19 @@ public class Room {
 
     private String name;
 
+    @JsonIgnore
     @ManyToMany(cascade = CascadeType.MERGE)
-    @JoinTable(name = "room_person",
+    @JoinTable(name = "room_admins",
             joinColumns = @JoinColumn(name = "room_id"),
-            inverseJoinColumns = @JoinColumn(name = "person_id"))
-    private List<Person> admins = new ArrayList<>();
+            inverseJoinColumns = @JoinColumn(name = "admin_id"))
+    private Set<Person> admins = new HashSet<>();
 
+    @JsonIgnore
     @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(name = "room_person",
             joinColumns = @JoinColumn(name = "room_id"),
             inverseJoinColumns = @JoinColumn(name = "person_id"))
-    private List<Person> members = new ArrayList<>();
+    private Set<Person> members = new HashSet<>();
 
     public Room() {
     }
@@ -66,19 +69,19 @@ public class Room {
         this.name = name;
     }
 
-    public List<Person> getAdmins() {
+    public Set<Person> getAdmins() {
         return admins;
     }
 
-    public void setAdmins(List<Person> admins) {
+    public void setAdmins(Set<Person> admins) {
         this.admins = admins;
     }
 
-    public List<Person> getMembers() {
+    public Set<Person> getMembers() {
         return members;
     }
 
-    public void setMembers(List<Person> members) {
+    public void setMembers(Set<Person> members) {
         this.members = members;
     }
 

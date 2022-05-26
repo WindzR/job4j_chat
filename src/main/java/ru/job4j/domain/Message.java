@@ -3,10 +3,11 @@ package ru.job4j.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
+@Table(name = "messages")
 public class Message {
 
     @Id
@@ -15,14 +16,15 @@ public class Message {
 
     private String message;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime created;
+    private Date created;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "author_id")
     private Person author;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "room_id")
     private Room room;
 
@@ -51,11 +53,11 @@ public class Message {
         this.message = message;
     }
 
-    public LocalDateTime getCreated() {
+    public Date getCreated() {
         return created;
     }
 
-    public void setCreated(LocalDateTime created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
@@ -92,7 +94,7 @@ public class Message {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, message, created, author, room);
+        return Objects.hash(id, message);
     }
 
     @Override

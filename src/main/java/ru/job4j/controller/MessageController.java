@@ -31,7 +31,7 @@ public class MessageController {
     /**
      * Получить все Message всех участников в определенной комнате
      */
-    @GetMapping("/{roomId}")
+    @GetMapping("/room/{roomId}")
     public List<Message> findAllMessagesInRoom(@PathVariable int roomId) {
         return messages.findAll().stream()
                 .filter(message -> message.getRoom().getId() == roomId)

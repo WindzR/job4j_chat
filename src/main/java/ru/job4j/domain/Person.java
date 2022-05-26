@@ -1,11 +1,10 @@
 package ru.job4j.domain;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
+@Table(name = "persons")
 public class Person {
 
     @Id
@@ -18,15 +17,9 @@ public class Person {
 
     private String password;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "role_id")
     private Role role;
-
-    @ManyToMany(cascade = CascadeType.MERGE)
-    @JoinTable(name = "room_person",
-        joinColumns = @JoinColumn(name = "person_id"),
-        inverseJoinColumns = @JoinColumn(name = "room_id"))
-    private List<Room> rooms = new ArrayList<>();
 
     private boolean enabled;
 
@@ -82,14 +75,6 @@ public class Person {
         this.role = role;
     }
 
-    public List<Room> getRooms() {
-        return rooms;
-    }
-
-    public void setRooms(List<Room> rooms) {
-        this.rooms = rooms;
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
@@ -109,12 +94,12 @@ public class Person {
         Person person = (Person) o;
         return id == person.id && enabled == person.enabled && username.equals(person.username)
                 && login.equals(person.login) && Objects.equals(password, person.password)
-                && Objects.equals(role, person.role) && Objects.equals(rooms, person.rooms);
+                && Objects.equals(role, person.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, login, password, role, enabled);
+        return Objects.hash(id, username, login);
     }
 
     @Override
@@ -125,7 +110,6 @@ public class Person {
                 + ", login='" + login + '\''
                 + ", password='" + password + '\''
                 + ", role=" + role
-                + ", rooms=" + rooms
                 + ", enabled=" + enabled
                 + '}';
     }

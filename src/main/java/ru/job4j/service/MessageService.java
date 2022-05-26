@@ -34,7 +34,7 @@ public class MessageService {
     }
 
     public List<Message> findAll() {
-        return (List<Message>) messageDAO.findAll();
+        return messageDAO.findAll();
     }
 
     public Message save(Message message) {
@@ -51,35 +51,6 @@ public class MessageService {
         message.setId(id);
         messageDAO.delete(message);
     }
-
-//    public Optional<Message> addMessage(int roomId, int personId, Message message) {
-//        Optional<Room> room = roomDAO.findById(roomId);
-//        Optional<Person> person = personDAO.findById(personId);
-//        if (room.isPresent()
-//                && person.isPresent()
-//                && room.get().containsPerson(person.get())) {
-//            message.setRoom(room.get());
-//            message.setAuthor(person.get());
-//            messageDAO.save(message);
-//            return Optional.of(message);
-//        } else {
-//            return Optional.empty();
-//        }
-//    }
-
-//    public Optional<Message> updateMessage(int roomId, int personId, Message message) {
-//        Optional<Room> room = roomDAO.findById(roomId);
-//        Optional<Person> person = personDAO.findById(personId);
-//        if (room.isPresent()
-//                && person.isPresent()
-//                && room.get().containsPerson(person.get())) {
-//            message.setMessage(message.getMessage());
-//            messageDAO.save(message);
-//            return Optional.of(message);
-//        } else {
-//            return Optional.empty();
-//        }
-//    }
 
     public Optional<Message> updateMessage(int roomId, int personId, Message message) {
         return createOrUpdateMessage(roomId, personId, message, msg -> {

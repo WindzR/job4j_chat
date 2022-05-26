@@ -23,6 +23,12 @@ create table room_person (
     person_id INT REFERENCES persons(id)
 );
 
+create table room_admins (
+    id serial primary key,
+    room_id INT REFERENCES rooms(id),
+    admin_id INT REFERENCES persons(id)
+);
+
 CREATE TABLE messages (
     id serial primary key,
     message TEXT NOT NULL,
@@ -33,6 +39,10 @@ CREATE TABLE messages (
 
 insert into roles (authority) values ('ROLE_USER');
 insert into roles (authority) values ('ROLE_ADMIN');
+
+insert into persons (username, login, password, enabled, role_id)
+values ('Owner', 'owner@rest.ru', '123456', true,
+        (select id from roles where authority = 'ROLE_ADMIN'));
 
 insert into persons (username, login, password, enabled, role_id)
 values ('Admin', 'admin@shishka.ru', '123456', true,
@@ -46,4 +56,6 @@ insert into rooms (name) values ('Job for Java Devs');
 
 insert into room_person (id, room_id, person_id) values (1, 1, 1);
 insert into room_person (id, room_id, person_id) values (2, 1, 2);
+
+insert into room_admins (id, room_id, admin_id) values (1, 1, 3);
 

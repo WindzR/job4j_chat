@@ -18,7 +18,7 @@ public class RoomService {
     }
 
     public List<Room> findAll() {
-        return (List<Room>) roomDAO.findAll();
+        return roomDAO.findAll();
     }
 
     public Room save(Room room) {
@@ -64,12 +64,5 @@ public class RoomService {
         } else {
             return Optional.empty();
         }
-    }
-
-    /**
-     * Содержание определенного пользователя в данной комнате
-     */
-    public boolean isPersonInRoom(int roomId, int personId) {
-        return true;
     }
 }

@@ -18,7 +18,7 @@ public class PersonService {
     }
 
     public List<Person> findAll() {
-        return (List<Person>) personDAO.findAll();
+        return personDAO.findAll();
     }
 
     public Person save(Person person) {
