@@ -70,11 +70,12 @@ public class RoomController {
     }
 
     /**
-     * Добавить Person в Room
+     * Добавить уже существующего Person в Room
      */
-    @PostMapping("/{id}/person")
-    public ResponseEntity<Room> addPersonToRoom(@PathVariable int id, Person person) {
-        Optional<Room> room = rooms.addPersonToRoom(id, person);
+    @PostMapping("/{roomId}/{personId}")
+    public ResponseEntity<Room> addPersonToRoom(@PathVariable int roomId,
+                                                @PathVariable int personId) {
+        Optional<Room> room = rooms.addPersonToRoom(roomId, personId);
         return new ResponseEntity<>(
                 room.orElse(new Room()),
                 room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
@@ -84,9 +85,10 @@ public class RoomController {
     /**
      * Сделать Person админом в Room
      */
-    @PutMapping("/{id}/{personId}")
-    public ResponseEntity<Room> makePersonAdmin(@PathVariable int id, @PathVariable int personId) {
-        var room = rooms.makePersonAdmin(id, personId);
+    @PutMapping("/{roomId}/{personId}")
+    public ResponseEntity<Room> makePersonAdmin(@PathVariable int roomId,
+                                                @PathVariable int personId) {
+        var room = rooms.makePersonAdmin(roomId, personId);
         return new ResponseEntity<>(
                 room.orElse(new Room()),
                 room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND

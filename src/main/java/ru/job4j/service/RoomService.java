@@ -1,6 +1,7 @@
 package ru.job4j.service;
 
 import org.springframework.stereotype.Service;
+import ru.job4j.dao.PersonRepository;
 import ru.job4j.dao.RoomRepository;
 import ru.job4j.domain.Person;
 import ru.job4j.domain.Room;
@@ -13,11 +14,16 @@ public class RoomService {
 
     private final RoomRepository roomDAO;
 
-    public RoomService(final RoomRepository roomDAO) {
+    private final PersonRepository personDAO;
+
+    public RoomService(final RoomRepository roomDAO, final PersonRepository personDAO) {
         this.roomDAO = roomDAO;
+        this.personDAO = personDAO;
     }
 
     public List<Room> findAll() {
+        List<Room> rooms = roomDAO.findAll();
+        System.out.println("***All ROOMS***" + rooms);
         return roomDAO.findAll();
     }
 
@@ -27,6 +33,8 @@ public class RoomService {
     }
 
     public Optional<Room> findById(int id) {
+        Optional<Room> roomOptional = roomDAO.findById(id);
+        System.out.println("**Room by ID = **" + id + " " + roomOptional.get());
         return roomDAO.findById(id);
     }
 
@@ -36,11 +44,14 @@ public class RoomService {
         roomDAO.delete(room);
     }
 
-    public Optional<Room> addPersonToRoom(int id, Person person) {
+    public Optional<Room> addPersonToRoom(int id, int personId) {
         var room = roomDAO.findById(id);
-        if (room.isPresent()) {
+        var person = personDAO.findById(personId);
+        if (room.isPresent() && person.isPresent()) {
             Room updateRoom = room.get();
-            updateRoom.addMember(person);
+            if (!updateRoom.containsPerson(person.get())) {
+                updateRoom.addMember(person.get());
+            }
             roomDAO.save(updateRoom);
             return Optional.of(updateRoom);
         }

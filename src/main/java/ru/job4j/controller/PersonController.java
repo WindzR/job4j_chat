@@ -70,11 +70,12 @@ public class PersonController {
     }
 
     /**
-     * Изменить Role У Person
+     * Изменяет Role У Person, если роль "ROLE_USER", то меняется на "ROLE_ADMIN",
+     * иначе - в обратном порядке!
      */
-    @PutMapping("/{id}/role")
-    public ResponseEntity<Person> updateRoleOfPerson(@PathVariable int id, Role role) {
-        Optional<Person> person = persons.updateRole(id, role);
+    @PutMapping("/{personId}/role")
+    public ResponseEntity<Person> updateRoleOfPerson(@PathVariable int personId) {
+        Optional<Person> person = persons.updateRole(personId);
         return new ResponseEntity<Person>(
             person.orElse(new Person()),
             person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
