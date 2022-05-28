@@ -22,8 +22,6 @@ public class RoomService {
     }
 
     public List<Room> findAll() {
-        List<Room> rooms = roomDAO.findAll();
-        System.out.println("***All ROOMS***" + rooms);
         return roomDAO.findAll();
     }
 
@@ -33,8 +31,6 @@ public class RoomService {
     }
 
     public Optional<Room> findById(int id) {
-        Optional<Room> roomOptional = roomDAO.findById(id);
-        System.out.println("**Room by ID = **" + id + " " + roomOptional.get());
         return roomDAO.findById(id);
     }
 

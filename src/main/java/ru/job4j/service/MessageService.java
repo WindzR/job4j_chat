@@ -21,10 +21,6 @@ public class MessageService {
 
     private final RoomRepository roomDAO;
 
-    private Optional<Room> room = Optional.empty();
-
-    private Optional<Person> person = Optional.empty();
-
     public MessageService(final MessageRepository messageDAO,
                           final PersonRepository personDAO,
                           final RoomRepository roomDAO) {
@@ -53,26 +49,30 @@ public class MessageService {
     }
 
     public Optional<Message> updateMessage(int roomId, int personId, Message message) {
-        return createOrUpdateMessage(roomId, personId, message, msg -> {
+        Optional<Room> room = findRoomById(roomId);
+        Optional<Person> person = findPersonById(personId);
+        return createOrUpdateMessage(message, room, person,
+                                        msg -> {
                                                 msg.setMessage(message.getMessage());
                                                 return msg;
         });
     }
 
     public Optional<Message> addMessage(int roomId, int personId, Message message) {
-        return createOrUpdateMessage(roomId, personId, message, msg -> {
-                                                msg.setRoom(room.get());
-                                                msg.setAuthor(person.get());
-                                                return msg;
-        });
+        Optional<Room> room = findRoomById(roomId);
+        Optional<Person> person = findPersonById(personId);
+        return createOrUpdateMessage(message, room, person,
+                operatorForAddMessage(room, person));
     }
 
-    public Optional<Message> createOrUpdateMessage(int roomId,
-                                                   int personId,
-                                                   Message message,
+    public List<Message> findMessageByRoomId(int id) {
+        return messageDAO.findMessageByRoomId(id);
+    }
+
+    private Optional<Message> createOrUpdateMessage(Message message,
+                                                   Optional<Room> room,
+                                                   Optional<Person> person,
                                                    UnaryOperator<Message> action) {
-        room = roomDAO.findById(roomId);
-        person = personDAO.findById(personId);
         if (room.isPresent()
                 && person.isPresent()
                 && room.get().containsPerson(person.get())) {
@@ -82,5 +82,22 @@ public class MessageService {
         } else {
             return Optional.empty();
         }
+    }
+
+    private Optional<Room> findRoomById(int roomId) {
+        return roomDAO.findById(roomId);
+    }
+
+    private Optional<Person> findPersonById(int personId) {
+        return personDAO.findById(personId);
+    }
+
+    private UnaryOperator<Message> operatorForAddMessage(Optional<Room> room,
+                                                         Optional<Person> person) {
+        return msg -> {
+                        msg.setRoom(room.get());
+                        msg.setAuthor(person.get());
+                        return msg;
+        };
     }
 }

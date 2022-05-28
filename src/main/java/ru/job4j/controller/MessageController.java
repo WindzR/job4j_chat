@@ -8,7 +8,6 @@ import ru.job4j.service.MessageService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/message")
@@ -33,9 +32,7 @@ public class MessageController {
      */
     @GetMapping("/room/{roomId}")
     public List<Message> findAllMessagesInRoom(@PathVariable int roomId) {
-        return messages.findAll().stream()
-                .filter(message -> message.getRoom().getId() == roomId)
-                .collect(Collectors.toList());
+        return messages.findMessageByRoomId(roomId);
     }
 
     /**

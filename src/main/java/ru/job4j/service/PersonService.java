@@ -55,13 +55,13 @@ public class PersonService {
     }
 
     private Role findAlternativeRole(List<Role> roles, Role currentRole) {
-        if (currentRole.getRole().equals("ROLE_USER")) {
+        if ("ROLE_USER".equals(currentRole.getRole())) {
             return roles.stream()
-                    .filter(role -> role.getRole().equals("ROLE_ADMIN"))
+                    .filter(role -> "ROLE_ADMIN".equals(role.getRole()))
                     .findFirst().orElse(null);
         }
         return roles.stream()
-                .filter(role -> role.getRole().equals("ROLE_USER"))
+                .filter(role -> "ROLE_USER".equals(role.getRole()))
                 .findFirst().orElse(null);
     }
 }

@@ -39,9 +39,7 @@ public class Room {
     }
 
     public void addMember(Person person) {
-        if (!members.contains(person)) {
-            members.add(person);
-        }
+        members.add(person);
     }
 
     public void addAdmin(Person person) {

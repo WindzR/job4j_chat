@@ -3,7 +3,6 @@ package ru.job4j.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.job4j.domain.Person;
 import ru.job4j.domain.Room;
 import ru.job4j.service.RoomService;
 

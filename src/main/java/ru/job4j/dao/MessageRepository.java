@@ -9,7 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface MessageRepository extends CrudRepository<Message, Integer> {
+
     List<Message> findAll();
 
     Optional<Message> findById(Integer integer);
+
+    List<Message> findMessageByRoomId(Integer id);
 }
