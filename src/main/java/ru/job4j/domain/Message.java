@@ -86,15 +86,12 @@ public class Message {
             return false;
         }
         Message message1 = (Message) o;
-        return id == message1.id && message.equals(message1.message)
-                && Objects.equals(created, message1.created)
-                && Objects.equals(author, message1.author)
-                && Objects.equals(room, message1.room);
+        return id == message1.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, message);
+        return Objects.hash(id);
     }
 
     @Override

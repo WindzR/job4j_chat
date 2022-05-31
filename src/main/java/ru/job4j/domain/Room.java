@@ -92,13 +92,12 @@ public class Room {
             return false;
         }
         Room room = (Room) o;
-        return id == room.id && name.equals(room.name)
-                && Objects.equals(admins, room.admins) && Objects.equals(members, room.members);
+        return id == room.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id);
     }
 
     @Override

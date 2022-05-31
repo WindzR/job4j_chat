@@ -92,14 +92,12 @@ public class Person {
             return false;
         }
         Person person = (Person) o;
-        return id == person.id && enabled == person.enabled && username.equals(person.username)
-                && login.equals(person.login) && Objects.equals(password, person.password)
-                && Objects.equals(role, person.role);
+        return id == person.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, login);
+        return Objects.hash(id);
     }
 
     @Override

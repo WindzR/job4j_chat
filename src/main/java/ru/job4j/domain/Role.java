@@ -48,13 +48,12 @@ public class Role {
             return false;
         }
         Role role1 = (Role) o;
-        return id == role1.id
-                && Objects.equals(role, role1.role);
+        return id == role1.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role);
+        return Objects.hash(id);
     }
 
     @Override
