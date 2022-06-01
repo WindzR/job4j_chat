@@ -18,4 +18,6 @@ public interface PersonRepository extends CrudRepository<Person, Integer> {
             + "JOIN FETCH person.role role "
             + "WHERE person.id = :idParam")
     Optional<Person> findById(@Param("idParam") Integer id);
+
+    Optional<Person> findByUsername(String username);
 }

@@ -2,7 +2,10 @@ package ru.job4j.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import ru.job4j.auth.UserDetailsServiceImpl;
 import ru.job4j.domain.Person;
 import ru.job4j.service.PersonService;
 
@@ -15,14 +18,22 @@ public class PersonController {
 
     private final PersonService persons;
 
-    public PersonController(final PersonService persons) {
+    private final UserDetailsServiceImpl auth;
+
+    private BCryptPasswordEncoder encoder;
+
+    public PersonController(final PersonService persons,
+                            final UserDetailsServiceImpl auth,
+                            BCryptPasswordEncoder encoder) {
         this.persons = persons;
+        this.auth = auth;
+        this.encoder = encoder;
     }
 
     /**
      * Получить всех Person с ролями
      */
-    @GetMapping("/")
+    @GetMapping("/all")
     public List<Person> findAll() {
         return persons.findAll();
     }
@@ -40,14 +51,28 @@ public class PersonController {
     }
 
     /**
-     * Создать новый Person
+     * Регистрация нового пользователя
+     * @param person Принимаемая модель пользователя
      */
-    @PostMapping("/")
-    public ResponseEntity<Person> createPerson(@RequestBody Person person) {
-        return new ResponseEntity<Person>(
-            persons.save(person),
-            HttpStatus.CREATED
-        );
+    @PostMapping("/sign-up")
+    public Person signUp(@RequestBody Person person) {
+        person.setPassword(encoder.encode(person.getPassword()));
+        return persons.save(person);
+    }
+
+    /**
+     * Аутентификация пользователя существующего пользователя
+     */
+    @PostMapping("/login")
+    public ResponseEntity<Person> loginPerson(@RequestBody Person person) {
+        if (auth.loadUserByUsername(person.getUsername()) != null) {
+            var personRepository = persons.findByUsername(person.getUsername());
+            return new ResponseEntity<Person>(
+                    personRepository.orElse(new Person()),
+                    personRepository.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+            );
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     /**

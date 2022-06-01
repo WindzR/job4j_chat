@@ -34,6 +34,10 @@ public class PersonService {
         return personDAO.findById(id);
     }
 
+    public Optional<Person> findByUsername(String username) {
+        return personDAO.findByUsername(username);
+    }
+
     public void delete(int id) {
         Person person = new Person();
         person.setId(id);
