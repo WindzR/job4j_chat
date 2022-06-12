@@ -2,11 +2,11 @@ package ru.job4j.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.UserDetailsServiceImpl;
 import ru.job4j.domain.Person;
+import ru.job4j.dto.PersonDto;
 import ru.job4j.service.PersonService;
 
 import java.util.List;
@@ -64,15 +64,17 @@ public class PersonController {
      * Аутентификация пользователя существующего пользователя
      */
     @PostMapping("/login")
-    public ResponseEntity<Person> loginPerson(@RequestBody Person person) {
-        if (auth.loadUserByUsername(person.getUsername()) != null) {
-            var personRepository = persons.findByUsername(person.getUsername());
-            return new ResponseEntity<Person>(
-                    personRepository.orElse(new Person()),
-                    personRepository.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+    public ResponseEntity<PersonDto> loginPerson(@RequestBody PersonDto personDto) {
+        if (auth.loadUserByUsername(personDto.getUsername()) != null) {
+            var personRepository = persons.findByUsername(personDto.getUsername());
+            PersonDto dto = PersonDto.fromPerson(personRepository.get());
+            Optional<PersonDto> result = Optional.of(dto);
+            return new ResponseEntity<PersonDto>(
+                    result.orElse(new PersonDto()),
+                    HttpStatus.OK
             );
         }
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     /**
