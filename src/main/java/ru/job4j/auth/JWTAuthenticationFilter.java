@@ -1,6 +1,5 @@
 package ru.job4j.auth;
 
-import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,9 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
-
-import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -30,8 +26,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private AuthenticationManager auth;
 
-    public JWTAuthenticationFilter(AuthenticationManager auth) {
+    private JwtTokenProvider jwtToken;
+
+    public JWTAuthenticationFilter(AuthenticationManager auth,
+                                   JwtTokenProvider jwtToken) {
         this.auth = auth;
+        this.jwtToken = jwtToken;
     }
 
     @Override
@@ -56,11 +56,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
                                             FilterChain chain, Authentication auth)
             throws IOException, ServletException {
-        String token = JWT.create()
-                .withSubject(((User) auth.getPrincipal()).getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .sign(HMAC512(SECRET.getBytes()));
-        System.out.println("Generate TOKEN " + token);
+        String username = ((User) auth.getPrincipal()).getUsername();
+        String token = jwtToken.createToken(username);
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
     }
 }

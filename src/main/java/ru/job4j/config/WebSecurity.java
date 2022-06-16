@@ -16,6 +16,7 @@ import static ru.job4j.auth.JWTAuthenticationFilter.SIGN_UP_URL;
 
 import ru.job4j.auth.JWTAuthenticationFilter;
 import ru.job4j.auth.JWTAuthorizationFilter;
+import ru.job4j.auth.JwtTokenProvider;
 import ru.job4j.auth.UserDetailsServiceImpl;
 
 @EnableWebSecurity
@@ -23,11 +24,14 @@ public class WebSecurity  extends WebSecurityConfigurerAdapter {
 
     private UserDetailsServiceImpl userDetailsService;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private JwtTokenProvider jwtToken;
 
     public WebSecurity(UserDetailsServiceImpl userDetailsService,
-                       BCryptPasswordEncoder bCryptPasswordEncoder) {
+                       BCryptPasswordEncoder bCryptPasswordEncoder,
+                       JwtTokenProvider jwtToken) {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.jwtToken = jwtToken;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class WebSecurity  extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/person/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                .addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtToken))
                 .addFilter(new JWTAuthorizationFilter(authenticationManager()))
                 /* this disables session creation on Spring Security */
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

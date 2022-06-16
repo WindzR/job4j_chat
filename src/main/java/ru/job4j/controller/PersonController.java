@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.UserDetailsServiceImpl;
 import ru.job4j.domain.Person;
 import ru.job4j.dto.PersonDto;
+import ru.job4j.dto.ResponseDto;
+import ru.job4j.service.JwtTokenService;
 import ru.job4j.service.PersonService;
 
 import java.util.List;
@@ -22,12 +24,16 @@ public class PersonController {
 
     private BCryptPasswordEncoder encoder;
 
+    private final JwtTokenService jwtToken;
+
     public PersonController(final PersonService persons,
                             final UserDetailsServiceImpl auth,
-                            BCryptPasswordEncoder encoder) {
+                            BCryptPasswordEncoder encoder,
+                            final JwtTokenService jwtToken) {
         this.persons = persons;
         this.auth = auth;
         this.encoder = encoder;
+        this.jwtToken = jwtToken;
     }
 
     /**
@@ -64,13 +70,14 @@ public class PersonController {
      * Аутентификация пользователя существующего пользователя
      */
     @PostMapping("/login")
-    public ResponseEntity<PersonDto> loginPerson(@RequestBody PersonDto personDto) {
+    public ResponseEntity<ResponseDto> loginPerson(@RequestBody PersonDto personDto) {
         if (auth.loadUserByUsername(personDto.getUsername()) != null) {
             var personRepository = persons.findByUsername(personDto.getUsername());
-            PersonDto dto = PersonDto.fromPerson(personRepository.get());
-            Optional<PersonDto> result = Optional.of(dto);
-            return new ResponseEntity<PersonDto>(
-                    result.orElse(new PersonDto()),
+            String token = jwtToken.createToken(personRepository.get().getUsername());
+            ResponseDto dto = ResponseDto.fromPerson(personRepository.get(), token);
+            Optional<ResponseDto> result = Optional.of(dto);
+            return new ResponseEntity<ResponseDto>(
+                    result.orElse(new ResponseDto()),
                     HttpStatus.OK
             );
         }

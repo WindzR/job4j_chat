@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 import static ru.job4j.auth.JWTAuthenticationFilter.*;
 
-public class JWTAuthorizationFilter  extends BasicAuthenticationFilter {
+public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     public JWTAuthorizationFilter(AuthenticationManager authManager) {
         super(authManager);
