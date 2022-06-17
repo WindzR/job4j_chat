@@ -3,6 +3,7 @@ package ru.job4j.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Message;
 import ru.job4j.service.MessageService;
 
@@ -40,10 +41,13 @@ public class MessageController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Message> findById(@PathVariable int id) {
-        var room = messages.findById(id);
+        var message = messages.findById(id);
         return new ResponseEntity<>(
-                room.orElse(new Message()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+                message.orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Message is not found. Please, check required id.")
+                ),
+                HttpStatus.OK
         );
     }
 
@@ -54,10 +58,14 @@ public class MessageController {
     public ResponseEntity<Message> createMessage(@PathVariable int roomId,
                                                  @PathVariable int personId,
                                                  @RequestBody Message message) {
+        validMessage(message);
         Optional<Message> newMessage = messages.addMessage(roomId, personId, message);
         return new ResponseEntity<Message>(
-                newMessage.orElse(new Message()),
-                newMessage.isPresent() ? HttpStatus.CREATED : HttpStatus.NOT_FOUND
+                newMessage.orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room or Person is not found. Please, check required room id or person id.")
+                ),
+                HttpStatus.CREATED
         );
     }
 
@@ -68,10 +76,14 @@ public class MessageController {
     public ResponseEntity<Message> updateMessage(@PathVariable int roomId,
                                               @PathVariable int personId,
                                               @RequestBody Message message) {
+        validMessage(message);
         Optional<Message> updateMessage = messages.updateMessage(roomId, personId, message);
         return new ResponseEntity<Message>(
-                updateMessage.orElse(new Message()),
-                updateMessage.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+                updateMessage.orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room or Person is not found. Please, check required room id or person id.")
+                ),
+                HttpStatus.OK
         );
     }
 
@@ -82,5 +94,11 @@ public class MessageController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         messages.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    private void validMessage(Message message) {
+        if (message.getMessage() == null) {
+            throw new NullPointerException("Message mustn't be empty!");
+        }
     }
 }

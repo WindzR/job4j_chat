@@ -3,6 +3,7 @@ package ru.job4j.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Room;
 import ru.job4j.service.RoomService;
 
@@ -34,8 +35,11 @@ public class RoomController {
     public ResponseEntity<Room> findById(@PathVariable int id) {
         var room = rooms.findById(id);
         return new ResponseEntity<>(
-                room.orElse(new Room()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+                room.orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room is not found. Please, check required id."
+                )),
+                HttpStatus.OK
         );
     }
 
@@ -44,6 +48,7 @@ public class RoomController {
      */
     @PostMapping("/")
     public ResponseEntity<Room> createRoom(@RequestBody Room room) {
+        validRoom(room);
         return new ResponseEntity<Room>(
                 rooms.save(room),
                 HttpStatus.CREATED
@@ -55,6 +60,7 @@ public class RoomController {
      */
     @PutMapping("/")
     public ResponseEntity<Void> updateRoom(@RequestBody Room room) {
+        validRoom(room);
         rooms.save(room);
         return ResponseEntity.ok().build();
     }
@@ -76,8 +82,11 @@ public class RoomController {
                                                 @PathVariable int personId) {
         Optional<Room> room = rooms.addPersonToRoom(roomId, personId);
         return new ResponseEntity<>(
-                room.orElse(new Room()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+                room.orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room or person is not found. Please, check required room id or person id."
+                )),
+                HttpStatus.OK
         );
     }
 
@@ -89,9 +98,18 @@ public class RoomController {
                                                 @PathVariable int personId) {
         var room = rooms.makePersonAdmin(roomId, personId);
         return new ResponseEntity<>(
-                room.orElse(new Room()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+                room.orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room or person is not found. Please, check required room id or person id."
+                )),
+                HttpStatus.OK
         );
+    }
+
+    private void validRoom(Room room) {
+        if (room.getName() == null) {
+            throw new NullPointerException("Name mustn't be empty!");
+        }
     }
 
 }
