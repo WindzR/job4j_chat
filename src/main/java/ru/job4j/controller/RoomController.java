@@ -1,13 +1,17 @@
 package ru.job4j.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Room;
 import ru.job4j.service.RoomService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -49,29 +53,43 @@ public class RoomController {
     @PostMapping("/")
     public ResponseEntity<Room> createRoom(@RequestBody Room room) {
         validRoom(room);
-        return new ResponseEntity<Room>(
-                rooms.save(room),
-                HttpStatus.CREATED
-        );
+        Room savedRoom = rooms.save(room);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("CreateRoomHeader", "chat room")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(savedRoom);
     }
 
     /**
      * Изменить конкретный Room
      */
     @PutMapping("/")
-    public ResponseEntity<Void> updateRoom(@RequestBody Room room) {
+    public ResponseEntity<Room> updateRoom(@RequestBody Room room) {
         validRoom(room);
-        rooms.save(room);
-        return ResponseEntity.ok().build();
+        Room updatedRoom = rooms.save(room);
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .header("UpdateRoomHeader", "chat room")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(updatedRoom);
     }
 
     /**
      * Удалить Room по id
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<Map<String, String>> delete(@PathVariable int id) {
         rooms.delete(id);
-        return ResponseEntity.ok().build();
+        String message = "Room with id = " + id + " was deleted!";
+        Map<String, String> body = new HashMap<>() {{
+            put("DELETED", message);
+        }};
+        return new ResponseEntity<>(
+                body,
+                new MultiValueMapAdapter<String, String>(
+                        Map.of("DeleteRoom", List.of("delete room in chat"))
+                ),
+                HttpStatus.OK
+        );
     }
 
     /**
