@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.auth.UserDetailsServiceImpl;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -149,10 +151,49 @@ public class PersonController {
         );
     }
 
+    /**
+     * Принимает PersonDto, находит нужный Person по id и изменяет параметры Person согласно DTO
+     * @param personDto входящие параметры
+     * "id" - @NotNull
+     * @return Person с новыми параметрами
+     */
+    @PatchMapping("/patch")
+    public ResponseEntity<Person> patchPerson(@RequestBody PersonDto personDto) {
+        if (personDto.getId() == 0) {
+            throw new NullPointerException("Id mustn't be empty!");
+        }
+        validPersonDTO(personDto);
+        var personRepository = persons.findById(personDto.getId());
+        if (personRepository.isPresent()) {
+            Person patchPerson = personDto.patchPerson(personRepository.get());
+            persons.save(patchPerson);
+            return new ResponseEntity<Person>(
+                    patchPerson, HttpStatus.CREATED
+            );
+        }
+        return new ResponseEntity<Person>(
+                new Person(),
+                new MultiValueMapAdapter<String, String>(
+                        Map.of("NOT FOUND", List.of(
+                                "Person is not found. Please, check require id.")
+                        )),
+                HttpStatus.NOT_FOUND
+        );
+    }
+
     private void validPerson(Person person) {
         if (person.getUsername() == null
                 || person.getPassword() == null
                 || person.getLogin() == null
+        ) {
+            throw new NullPointerException("Username or password or login mustn't be empty!");
+        }
+    }
+
+    private void validPersonDTO(PersonDto personDto) {
+        if (personDto.getUsername() == null
+                || personDto.getPassword() == null
+                || personDto.getLogin() == null
         ) {
             throw new NullPointerException("Username or password or login mustn't be empty!");
         }

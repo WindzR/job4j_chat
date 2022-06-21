@@ -35,6 +35,13 @@ public class PersonDto {
         return person;
     }
 
+    public Person patchPerson(Person patchPerson) {
+        patchPerson.setUsername(username);
+        patchPerson.setLogin(login);
+        patchPerson.setPassword(password);
+        return patchPerson;
+    }
+
     public int getId() {
         return id;
     }

@@ -2,12 +2,15 @@ package ru.job4j.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Message;
+import ru.job4j.dto.MessageDTO;
 import ru.job4j.service.MessageService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -88,6 +91,33 @@ public class MessageController {
     }
 
     /**
+     * Принимает messageDTO, находит нужный Message по id и изменяет параметры Message согласно DTO
+     * @param messageDTO входящие параметры
+     * "id" - @NotNull
+     * @return Message с новыми параметрами
+     */
+    @PatchMapping("/patch")
+    public ResponseEntity<Message> patchRoom(@RequestBody MessageDTO messageDTO) {
+        validDtoMessage(messageDTO);
+        var messageRepository = messages.findById(messageDTO.getId());
+        if (messageRepository.isPresent()) {
+            Message patchMessage = messageDTO.patchMessage(messageRepository.get());
+            messages.save(patchMessage);
+            return new ResponseEntity<Message>(
+                    patchMessage, HttpStatus.CREATED
+            );
+        }
+        return new ResponseEntity<Message>(
+                new Message(),
+                new MultiValueMapAdapter<String, String>(
+                        Map.of("NOT FOUND", List.of(
+                                "Message is not found. Please, check required id.")
+                        )),
+                HttpStatus.NOT_FOUND
+        );
+    }
+
+    /**
      * Удалить Message по id
      */
     @DeleteMapping("/{id}")
@@ -99,6 +129,18 @@ public class MessageController {
     private void validMessage(Message message) {
         if (message.getMessage() == null) {
             throw new NullPointerException("Message mustn't be empty!");
+        }
+    }
+
+    private void validDtoMessage(MessageDTO messageDTO) {
+        if (messageDTO.getId() == 0) {
+            throw new NullPointerException("Id mustn't be empty!");
+        }
+        if (messageDTO.getMessage() == null
+                || messageDTO.getAuthor() == null
+                || messageDTO.getRoomDTO() == null
+        ) {
+            throw new NullPointerException("Message or Author or Room mustn't be empty!");
         }
     }
 }

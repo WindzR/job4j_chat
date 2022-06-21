@@ -7,6 +7,7 @@ import org.springframework.util.MultiValueMapAdapter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Room;
+import ru.job4j.dto.RoomDTO;
 import ru.job4j.service.RoomService;
 
 import java.util.HashMap;
@@ -121,6 +122,38 @@ public class RoomController {
                         "Room or person is not found. Please, check required room id or person id."
                 )),
                 HttpStatus.OK
+        );
+    }
+
+    /**
+     * Принимает RoomDTO, находит нужный Room по id и изменяет параметры Room согласно DTO
+     * @param roomDTO входящие параметры
+     * "id" - @NotNull
+     * @return Room с новыми параметрами
+     */
+    @PatchMapping("/patch")
+    public ResponseEntity<Room> patchRoom(@RequestBody RoomDTO roomDTO) {
+        if (roomDTO.getId() == 0) {
+            throw new NullPointerException("Id mustn't be empty!");
+        }
+        if (roomDTO.getName() == null) {
+            throw new NullPointerException("Name mustn't be empty!");
+        }
+        var roomRepository = rooms.findById(roomDTO.getId());
+        if (roomRepository.isPresent()) {
+            Room patchRoom = roomDTO.patchRoom(roomRepository.get());
+            rooms.save(patchRoom);
+            return new ResponseEntity<Room>(
+                    patchRoom, HttpStatus.CREATED
+            );
+        }
+        return new ResponseEntity<Room>(
+                new Room(),
+                new MultiValueMapAdapter<String, String>(
+                        Map.of("NOT FOUND", List.of(
+                                "Person is not found. Please, check require id.")
+                        )),
+                HttpStatus.NOT_FOUND
         );
     }
 
