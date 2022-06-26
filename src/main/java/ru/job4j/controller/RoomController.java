@@ -4,12 +4,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMapAdapter;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Room;
 import ru.job4j.dto.RoomDTO;
+import ru.job4j.handlers.Operation;
 import ru.job4j.service.RoomService;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +55,8 @@ public class RoomController {
      * Создать новый Room
      */
     @PostMapping("/")
-    public ResponseEntity<Room> createRoom(@RequestBody Room room) {
-        validRoom(room);
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Room> createRoom(@Valid @RequestBody Room room) {
         Room savedRoom = rooms.save(room);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("CreateRoomHeader", "chat room")
@@ -65,8 +68,8 @@ public class RoomController {
      * Изменить конкретный Room
      */
     @PutMapping("/")
-    public ResponseEntity<Room> updateRoom(@RequestBody Room room) {
-        validRoom(room);
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Room> updateRoom(@Valid @RequestBody Room room) {
         Room updatedRoom = rooms.save(room);
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .header("UpdateRoomHeader", "chat room")
@@ -132,13 +135,8 @@ public class RoomController {
      * @return Room с новыми параметрами
      */
     @PatchMapping("/patch")
-    public ResponseEntity<Room> patchRoom(@RequestBody RoomDTO roomDTO) {
-        if (roomDTO.getId() == 0) {
-            throw new NullPointerException("Id mustn't be empty!");
-        }
-        if (roomDTO.getName() == null) {
-            throw new NullPointerException("Name mustn't be empty!");
-        }
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Room> patchRoom(@Valid @RequestBody RoomDTO roomDTO) {
         var roomRepository = rooms.findById(roomDTO.getId());
         if (roomRepository.isPresent()) {
             Room patchRoom = roomDTO.patchRoom(roomRepository.get());
@@ -155,12 +153,6 @@ public class RoomController {
                         )),
                 HttpStatus.NOT_FOUND
         );
-    }
-
-    private void validRoom(Room room) {
-        if (room.getName() == null) {
-            throw new NullPointerException("Name mustn't be empty!");
-        }
     }
 
 }

@@ -1,8 +1,12 @@
 package ru.job4j.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import ru.job4j.handlers.Operation;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.Objects;
 
@@ -12,8 +16,12 @@ public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull(message = "Id must be non null", groups = {
+            Operation.OnUpdate.class, Operation.OnDelete.class})
     private int id;
 
+    @NotBlank(message = "Message must be not empty")
+    @Size(min = 10, message = "Message length must be more 10 symbols!")
     private String message;
 
     @Temporal(TemporalType.TIMESTAMP)

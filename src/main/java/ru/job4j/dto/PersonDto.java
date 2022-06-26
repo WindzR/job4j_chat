@@ -1,17 +1,27 @@
 package ru.job4j.dto;
 
 import ru.job4j.domain.Person;
+import ru.job4j.handlers.Operation;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 public class PersonDto {
 
+    @NotNull(message = "Id must be non null", groups = {
+            Operation.OnUpdate.class, Operation.OnDelete.class})
     private int id;
 
+    @NotBlank(message = "Username must be not empty")
     private String username;
 
+    @NotBlank(message = "Login must be not empty")
     private String login;
 
+    @NotBlank(message = "Password must be not empty")
+    @Size(min = 5, message = "Password length must be more 4 symbols!")
     private String password;
 
     public PersonDto() {

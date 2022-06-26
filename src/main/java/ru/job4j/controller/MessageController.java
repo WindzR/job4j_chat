@@ -3,12 +3,15 @@ package ru.job4j.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMapAdapter;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.domain.Message;
 import ru.job4j.dto.MessageDTO;
+import ru.job4j.handlers.Operation;
 import ru.job4j.service.MessageService;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,10 +61,10 @@ public class MessageController {
      * Создать новый Message от пользователя в комнате
      */
     @PostMapping("/{roomId}/{personId}")
+    @Validated(Operation.OnCreate.class)
     public ResponseEntity<Message> createMessage(@PathVariable int roomId,
                                                  @PathVariable int personId,
-                                                 @RequestBody Message message) {
-        validMessage(message);
+                                                 @Valid @RequestBody Message message) {
         Optional<Message> newMessage = messages.addMessage(roomId, personId, message);
         return new ResponseEntity<Message>(
                 newMessage.orElseThrow(() -> new ResponseStatusException(
@@ -76,10 +79,10 @@ public class MessageController {
      * Изменить Message от пользователя в комнате
      */
     @PutMapping("/{roomId}/{personId}")
+    @Validated(Operation.OnUpdate.class)
     public ResponseEntity<Message> updateMessage(@PathVariable int roomId,
                                               @PathVariable int personId,
-                                              @RequestBody Message message) {
-        validMessage(message);
+                                              @Valid @RequestBody Message message) {
         Optional<Message> updateMessage = messages.updateMessage(roomId, personId, message);
         return new ResponseEntity<Message>(
                 updateMessage.orElseThrow(() -> new ResponseStatusException(
@@ -97,8 +100,8 @@ public class MessageController {
      * @return Message с новыми параметрами
      */
     @PatchMapping("/patch")
-    public ResponseEntity<Message> patchRoom(@RequestBody MessageDTO messageDTO) {
-        validDtoMessage(messageDTO);
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Message> patchRoom(@Valid @RequestBody MessageDTO messageDTO) {
         var messageRepository = messages.findById(messageDTO.getId());
         if (messageRepository.isPresent()) {
             Message patchMessage = messageDTO.patchMessage(messageRepository.get());
@@ -124,23 +127,5 @@ public class MessageController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         messages.delete(id);
         return ResponseEntity.ok().build();
-    }
-
-    private void validMessage(Message message) {
-        if (message.getMessage() == null) {
-            throw new NullPointerException("Message mustn't be empty!");
-        }
-    }
-
-    private void validDtoMessage(MessageDTO messageDTO) {
-        if (messageDTO.getId() == 0) {
-            throw new NullPointerException("Id mustn't be empty!");
-        }
-        if (messageDTO.getMessage() == null
-                || messageDTO.getAuthor() == null
-                || messageDTO.getRoomDTO() == null
-        ) {
-            throw new NullPointerException("Message or Author or Room mustn't be empty!");
-        }
     }
 }

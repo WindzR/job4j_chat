@@ -7,17 +7,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.MultiValueMapAdapter;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.auth.UserDetailsServiceImpl;
 import ru.job4j.domain.Person;
 import ru.job4j.dto.PersonDto;
 import ru.job4j.dto.ResponseDto;
+import ru.job4j.handlers.Operation;
 import ru.job4j.service.JwtTokenService;
 import ru.job4j.service.PersonService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -83,11 +86,8 @@ public class PersonController {
      * @param person Принимаемая модель пользователя
      */
     @PostMapping("/sign-up")
-    public Person signUp(@RequestBody Person person) {
-        validPerson(person);
-        if (person.getPassword().length() < 5) {
-            throw new IllegalArgumentException("Password length must be more 4 symbols!");
-        }
+    @Validated(Operation.OnCreate.class)
+    public Person signUp(@Valid @RequestBody Person person) {
         person.setPassword(encoder.encode(person.getPassword()));
         return persons.save(person);
     }
@@ -96,13 +96,8 @@ public class PersonController {
      * Аутентификация пользователя существующего пользователя
      */
     @PostMapping("/login")
-    public ResponseEntity<ResponseDto> loginPerson(@RequestBody PersonDto personDto) {
-        if (personDto.getUsername() == null
-                || personDto.getPassword() == null
-                || personDto.getLogin() == null
-        ) {
-            throw new NullPointerException("Username or password or login mustn't be empty!");
-        }
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<ResponseDto> loginPerson(@Valid @RequestBody PersonDto personDto) {
         if (auth.loadUserByUsername(personDto.getUsername()) != null) {
             var personRepository = persons.findByUsername(personDto.getUsername());
             String token = jwtToken.createToken(personRepository.get().getUsername());
@@ -120,8 +115,8 @@ public class PersonController {
      * Изменить конкретный Person
      */
     @PutMapping("/")
-    public ResponseEntity<Void> updatePerson(@RequestBody Person person) {
-        validPerson(person);
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> updatePerson(@Valid @RequestBody Person person) {
         persons.save(person);
         return ResponseEntity.ok().build();
     }
@@ -158,11 +153,8 @@ public class PersonController {
      * @return Person с новыми параметрами
      */
     @PatchMapping("/patch")
-    public ResponseEntity<Person> patchPerson(@RequestBody PersonDto personDto) {
-        if (personDto.getId() == 0) {
-            throw new NullPointerException("Id mustn't be empty!");
-        }
-        validPersonDTO(personDto);
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Person> patchPerson(@Valid @RequestBody PersonDto personDto) {
         var personRepository = persons.findById(personDto.getId());
         if (personRepository.isPresent()) {
             Person patchPerson = personDto.patchPerson(personRepository.get());
@@ -179,24 +171,6 @@ public class PersonController {
                         )),
                 HttpStatus.NOT_FOUND
         );
-    }
-
-    private void validPerson(Person person) {
-        if (person.getUsername() == null
-                || person.getPassword() == null
-                || person.getLogin() == null
-        ) {
-            throw new NullPointerException("Username or password or login mustn't be empty!");
-        }
-    }
-
-    private void validPersonDTO(PersonDto personDto) {
-        if (personDto.getUsername() == null
-                || personDto.getPassword() == null
-                || personDto.getLogin() == null
-        ) {
-            throw new NullPointerException("Username or password or login mustn't be empty!");
-        }
     }
 
     @ExceptionHandler(value = { IllegalArgumentException.class })

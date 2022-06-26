@@ -3,17 +3,27 @@ package ru.job4j.dto;
 import ru.job4j.domain.Message;
 import ru.job4j.domain.Person;
 import ru.job4j.domain.Room;
+import ru.job4j.handlers.Operation;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 public class MessageDTO {
 
+    @NotNull(message = "Id must be non null", groups = {
+            Operation.OnUpdate.class, Operation.OnDelete.class})
     private int id;
 
+    @NotBlank(message = "Message must be not empty")
+    @Size(min = 10, message = "Message length must be more 10 symbols!")
     private String message;
 
+    @NotNull(message = "Author must be not empty")
     private PersonDto author;
 
+    @NotNull(message = "Room must be not empty")
     private RoomDTO roomDTO;
 
     public MessageDTO() {
